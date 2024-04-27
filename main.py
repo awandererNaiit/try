@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class Product(ABC):
+class BaseProduct(ABC):
     def __init__(self, name, description, price, amount):
         self._name = name
         self._description = description
@@ -10,6 +10,10 @@ class Product(ABC):
 
     @abstractmethod
     def specific_info(self):
+        pass
+
+    @abstractmethod
+    def new_product(self, *args):
         pass
 
     def __repr__(self):
@@ -51,7 +55,11 @@ class Product(ABC):
 class ProductCreationMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        print(f"Создан объект класса {self.__class__.__name__}: {self.__repr__()}")
+        print(repr(self))
+
+    def __repr__(self):
+        object_attributes = ', '.join(f"{k}={v}" for k, v in self.__dict__.items())
+        return f"создан объект со свойствами: {object_attributes}"
 
 
 class Category:
@@ -73,7 +81,7 @@ class Category:
         self._products = products
 
     def add_product(self, product):
-        if not isinstance(product, Product):
+        if not isinstance(product, BaseProduct):
             raise TypeError("Нельзя добавлять разные продукты")
         self._products.append(product)
         Category.total_unique_products += 1
@@ -97,7 +105,7 @@ class Category:
         return sum(product.amount for product in self._products)
 
 
-class Smartphone(Product, ProductCreationMixin):
+class Smartphone(BaseProduct, ProductCreationMixin):
     def __init__(self, name, description, price, amount, brand, model, storage, color):
         super().__init__(name, description, price, amount)
         self._brand = brand
@@ -108,8 +116,11 @@ class Smartphone(Product, ProductCreationMixin):
     def specific_info(self):
         return f"Brand: {self._brand}, Model: {self._model}, Storage: {self._storage}, Color: {self._color}"
 
+    def new_product(self, *args):
+        return Smartphone(*args)
 
-class LawnGrass(Product, ProductCreationMixin):
+
+class LawnGrass(BaseProduct, ProductCreationMixin):
     def __init__(self, name, description, price, amount, origin, duration, color):
         super().__init__(name, description, price, amount)
         self._origin = origin
@@ -118,3 +129,6 @@ class LawnGrass(Product, ProductCreationMixin):
 
     def specific_info(self):
         return f"Origin: {self._origin}, Duration: {self._duration}, Color: {self._color}"
+
+    def new_product(self, *args):
+        return LawnGrass(*args)

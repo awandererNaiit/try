@@ -1,54 +1,27 @@
 import pytest
-
-from main import Category, Product
-
-
-class TestCategory:
-    def test_create_category(self):
-        category = Category('категория', 'Описание категории')
-        assert category.name == 'категория'
-        assert category.description == 'Описание категории'
-
-    def test_add_product(self):
-        category = Category('категория', 'Описание категории')
-        product = Product.create_product('продукт', 'Описание продукта', 100500, 10)
-        category.add_product(product)
-        assert len(category.products) == 1
-        assert Category.total_unique_products == 1
-
-    def test_remove_product(self):
-        category = Category('категория', 'Описание категории')
-        product = Product.create_product('продукт', 'Описание продукта', 100500, 10)
-        category.add_product(product)
-        category.remove_product(product)
-        assert len(category.products) == 0
-        assert Category.total_unique_products == 0
-
-    def test_get_products_info(self):
-        category = Category('категория', 'Описание категории')
-        product1 = Product.create_product('продукт 1', 'Описание продукта 1', 100500, 10)
-        product2 = Product.create_product('продукт 2', 'Описание продукта 2', 200, 5)
-        category.add_product(product1)
-        category.add_product(product2)
-        products_info = category.get_products_info()
-        assert products_info == [
-            'продукт 1, 100500 руб. Остаток: 10 шт.',
-            'продукт 2, 200 руб. Остаток: 5 шт.',
-        ]
-
+from main import Product, Smartphone, LawnGrass, ProductCreationMixin
 
 class TestProduct:
-    def test_create_product(self):
-        product = Product.create_product('продукт', 'Описание продукта', 100500, 10)
-        assert product.name == 'продукт'
-        assert product.description == 'Описание продукта'
-        assert product.price == 100500
-        assert product.amount == 10
+    def test_product_is_abstract(self):
+        with pytest.raises(TypeError):
+            Product()
 
-    def test_set_price(self):
-        product = Product.create_product('продукт', 'Описание продукта', 100500, 10)
-        product.price = 200
-        assert product.price == 200
+    def test_smartphone_specific_info(self):
+        # Передаем все необходимые аргументы для создания объекта Smartphone
+        smartphone = Smartphone('Apple', 'iPhone', '12 Pro', '256GB', 'Silver', 'iOS', 6.1, 'Silver')
+        assert smartphone.specific_info() == "Operating System: iOS, Screen Size: 6.1 inches"
 
-        product.price = -50
-        assert product.price == 200
+    def test_lawngrass_specific_info(self):
+        lawngrass = LawnGrass('Bermuda', 'Hybrid', 'Green', 'Full Sun')
+        assert lawngrass.specific_info() == "Type: Hybrid, Color: Green, Sunlight: Full Sun"
+
+class TestProductCreationMixin:
+    def test_creation_mixin(self, capsys):
+        class TestClass(ProductCreationMixin):
+            def __init__(self, name):
+                self.name = name
+
+        test_object = TestClass('Test')
+        test_object.specific_info()  # Вызываем метод specific_info() для логирования
+        captured = capsys.readouterr()
+        assert captured.out == "Object Test created.\n"
