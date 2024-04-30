@@ -35,6 +35,9 @@ class Product(BaseProduct, PrintMixin):
 
     @classmethod
     def new_product(cls, product_data: dict):
+        if product_data.get('quantity', 0) == 0:
+            raise ValueError("Товар с нулевым количеством не может быть добавлен")
+
         return cls(**product_data)
 
     @property
@@ -63,6 +66,26 @@ class Product(BaseProduct, PrintMixin):
 
     def __repr__(self):
         return f"{self.__class__.__name__}(name='{self.name}', price={self.price}, amount={self.amount})"
+
+
+class Category:
+    def __init__(self):
+        self.products = []
+
+    def calculate_average_price(self):
+        total_price = 0
+        total_products = len(self.products)
+
+        if total_products == 0:
+            return 0
+
+        try:
+            for product in self.products:
+                total_price += product.price
+            average_price = total_price / total_products
+            return average_price
+        except ZeroDivisionError:
+            return 0
 
 
 class Smartphone(Product):
