@@ -1,28 +1,21 @@
 import pytest
-from main import Product, Smartphone, LawnGrass, ProductCreationMixin
+from main import BaseProduct, Product, Category, Smartphone, LawnGrass
 
 
-class TestProduct:
-    def test_product_is_abstract(self):
-        with pytest.raises(TypeError):
-            Product()
-
-    def test_smartphone_specific_info(self):
-        smartphone = Smartphone('Apple', 'iPhone', '12 Pro', '256GB', 'Silver', 'iOS', 6.1, 'Silver')
-        assert smartphone.specific_info() == "Operating System: iOS, Screen Size: 6.1 inches"
-
-    def test_lawngrass_specific_info(self):
-        lawngrass = LawnGrass('Bermuda', 'Hybrid', 'Green', 'Full Sun')
-        assert lawngrass.specific_info() == "Type: Hybrid, Color: Green, Sunlight: Full Sun"
+def test_new_product_with_zero_quantity():
+    with pytest.raises(ValueError):
+        Product.new_product({'name': 'Товар', 'description': 'Описание', 'price': 100, 'quantity': 0})
 
 
-class TestProductCreationMixin:
-    def test_creation_mixin(self, capsys):
-        class TestClass(ProductCreationMixin):
-            def __init__(self, name):
-                self.name = name
+def test_calculate_average_price_with_no_products():
+    category = Category()
+    assert category.calculate_average_price() == 0
 
-        test_object = TestClass('Test')
-        test_object.specific_info()
-        captured = capsys.readouterr()
-        assert captured.out == "Object Test created.\n"
+
+@pytest.mark.parametrize("products, expected_average_price", [
+    ([Product('Товар 1', 'Описание', 100, 5), Product('Товар 2', 'Описание', 50, 3)], 75.0),
+])
+def test_calculate_average_price_with_products(products, expected_average_price):
+    category = Category()
+    category.products = products
+    assert category.calculate_average_price() == expected_average_price
