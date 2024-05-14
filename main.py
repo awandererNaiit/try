@@ -72,13 +72,19 @@ class Category:
     def __init__(self):
         self.products = []
 
+    def __len__(self):
+        return len(self.products)
+
+    def add_product(self, product):
+        if product.quantity == 0:
+            raise ValueError("Нельзя добавить товар с нулевым количеством!")
+        self.products.append(product)
+
     def calculate_average_price(self):
         total_price = 0
         total_products = len(self.products)
-
         if total_products == 0:
             return 0
-
         try:
             for product in self.products:
                 total_price += product.price
